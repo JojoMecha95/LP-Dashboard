@@ -147,7 +147,7 @@ selected_rows = st.data_editor(
 
 st.divider()
 
-df.to_csv('/Users/jmechach/Desktop/LP_Dashboard/Meta_modificato.csv')
+#df.to_csv('/Users/jmechach/Desktop/LP_Dashboard/Meta_modificato.csv')
 
 ##----- TREND CPL per URL per WEEK -----
 
