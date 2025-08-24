@@ -5,7 +5,8 @@ import datetime
 import streamlit as st
 
 #file = "/Users/jmechach/Desktop/LP_Dashboard/Meta.csv"
-file = "/Users/jmechach/Desktop/LP_Dashboard/META_ALL COUNTRIES.csv"
+#file = "/Users/jmechach/Desktop/LP_Dashboard/META_ALL COUNTRIES.csv"
+file = "META_ALL COUNTRIES.csv"
 
 @st.cache_data
 
