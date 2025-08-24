@@ -7,7 +7,8 @@ from datetime import datetime
 
 
 #file = "/Users/jmechach/Desktop/LP_Dashboard/Meta.csv"
-file = "/Users/jmechach/Desktop/LP_Dashboard/Taboola.csv"
+#file = "/Users/jmechach/Desktop/LP_Dashboard/Taboola.csv"
+file = "Taboola.csv"
 
 @st.cache_data
 
