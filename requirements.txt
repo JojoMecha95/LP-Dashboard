@@ -8,3 +8,4 @@ folium
 pgeocode
 matplotlib
 seaborn
+altair<5
