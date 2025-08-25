@@ -1,8 +1,9 @@
 import streamlit as st
 
 st.set_page_config(
-    page_title="Multipage App",
-    page_icon="👋",
+    page_title = "LP App",
+    page_icon = "🐭"
 )
 
-st.title("Main Page")
+st.title("Welcome!")
+st.sidebar.success("Select the Channel")
