@@ -152,14 +152,14 @@ def cpa_aggregation(group_df):
         'CPA': total_spent / total_conversions if total_conversions > 0 else float('nan')
     })
 
-pivot_with_cpa = df.groupby('URL').apply(cpa_aggregation).reset_index()
+pivot_with_cpa = filtered_df.groupby('URL').apply(cpa_aggregation).reset_index()
 
 selected_rows = st.data_editor(
     pivot_with_cpa
     .sort_values(by="Conversions", ascending=False)
     .reset_index(drop=True),
     use_container_width=True,
-    height=600,
+    height=400,
     width=1500,
     num_rows="dynamic",
     hide_index=True,
@@ -201,4 +201,5 @@ st.plotly_chart(fig, use_container_width=True)
 
 
 st.divider()
+
 
