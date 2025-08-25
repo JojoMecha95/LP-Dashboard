@@ -10,6 +10,7 @@ from datetime import datetime
 #file = "/Users/jmechach/Desktop/LP_Dashboard/Taboola.csv"
 file = "Taboola.csv"
 
+
 @st.cache_data
 
 #---- Funzioni Varie ----
@@ -140,15 +141,26 @@ st.write(f"🆔 {len(list(filtered_df['MCI'].unique()))} MCIs Found",divider=Tru
 ##----- TABELLA -----
 
 #zip_states = filtered_df_yes.groupby('State_y').size().reset_index(name='Appt')
-df_recap = filtered_df.groupby('URL')['CPA'].mean().reset_index(name='Leads')
+#df_recap = filtered_df.groupby('URL')['CPA'].sum().reset_index(name='Leads')
+
+def cpa_aggregation(group_df):
+    total_spent = group_df['Spent'].sum()
+    total_conversions = group_df['Conversions'].sum()
+    return pd.Series({
+        'Spent': total_spent,
+        'Conversions': total_conversions,
+        'CPA': total_spent / total_conversions if total_conversions > 0 else float('nan')
+    })
+
+pivot_with_cpa = df.groupby('URL').apply(cpa_aggregation).reset_index()
 
 selected_rows = st.data_editor(
-    df_recap
-    .sort_values(by="Leads", ascending=False)
+    pivot_with_cpa
+    .sort_values(by="Conversions", ascending=False)
     .reset_index(drop=True),
-    use_container_width=False,
-    height=400,
-    width=1000,
+    use_container_width=True,
+    height=600,
+    width=1500,
     num_rows="dynamic",
     hide_index=True,
     column_config={"Link": st.column_config.LinkColumn()},
@@ -189,3 +201,4 @@ st.plotly_chart(fig, use_container_width=True)
 
 
 st.divider()
+
