@@ -16,11 +16,8 @@ file = "Taboola.csv"
 #---- Funzioni Varie ----
 
 def get_week(value):
-    if isinstance(value, str):
-        date_string = datetime.strptime(f"{value}", "%m/%d/%Y")
-        week_number = date_string.isocalendar()[1]
-        return(week_number)
-    return np.nan
+    week_number = value.isocalendar()[1]
+    return(week_number)
 
 def extract_country(value): 
     if isinstance(value, str):
@@ -188,6 +185,19 @@ fig.update_layout(legend=dict(yanchor="top", y=-0.5, xanchor="left", x=0.2),show
 st.plotly_chart(fig, use_container_width=True)
 
 st.divider()
+##----- + Tavola
+grouped = df.groupby(['URL', 'Week']).agg({
+    'Spent': 'sum',
+    'Conversions': 'sum'
+}).reset_index()
+
+grouped['CPA'] = (grouped['Spent'] / grouped['Conversions']).map("{:,.1f}".format)
+pivot_week_url = grouped.pivot(index='URL', columns='Week', values='CPA')
+
+st.markdown('**URL performance by week**')
+st.write(pivot_week_url)
+
+st.divider()
 
 ##----- TREND CPL per MCI per WEEK -----
 
@@ -199,6 +209,20 @@ fig = px.line(pivot2, x='Date', y=pivot2.columns[1:], title="Cost per result by 
 
 st.plotly_chart(fig, use_container_width=True)
 
+
+st.divider()
+
+##----- + Tavola
+grouped = df.groupby(['MCI', 'Week']).agg({
+    'Spent': 'sum',
+    'Conversions': 'sum'
+}).reset_index()
+
+grouped['CPA'] = (grouped['Spent'] / grouped['Conversions']).map("{:,.1f}".format)
+pivot_week_url = grouped.pivot(index='MCI', columns='Week', values='CPA')
+
+st.markdown('**URL performance by week**')
+st.write(pivot_week_url)
 
 st.divider()
 
