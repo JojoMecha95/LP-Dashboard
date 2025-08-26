@@ -8,6 +8,7 @@ import streamlit as st
 #file = "/Users/jmechach/Desktop/LP_Dashboard/META_ALL COUNTRIES.csv"
 file = "META_ALL COUNTRIES.csv"
 
+
 @st.cache_data
 
 #---- Funzioni Varie ----
@@ -37,9 +38,10 @@ def extract_url(value):
 
 #---- CLEANING ----
 
+
 def load_data():
     df = pd.read_csv(file)
-    df = df.rename(columns={'Link (ad settings)': 'URL'})
+    df = df.rename(columns={'Link (ad settings)': 'URL','Amount spent (EUR)':'Spent'})
     df['Country'] = df['Ad name'].apply(get_country)
     df['MCI'] = df['Ad name'].apply(get_mci)
     df['date'] = pd.to_datetime(df['Week'].apply(extract_date),errors="coerce")
@@ -50,6 +52,8 @@ def load_data():
     return df.dropna(subset=["Results", "URL"])
 
 df = load_data()
+
+
 
 #---- DASHBOARD ----
 
@@ -123,18 +127,28 @@ else:
     if not mci_all:
         filtered_df = filtered_df[filtered_df['MCI'].isin(mcis)]
 
-st.subheader(f"🌐 {len(list(filtered_df['URL'].unique()))} URLs Found",divider=True)
-st.subheader(f"🆔 {len(list(filtered_df['MCI'].unique()))} MCIs Found",divider=True)
+st.write(f"🌐 **{len(list(filtered_df['URL'].unique()))}** URLs Found")
+st.write(f"🆔 **{len(list(filtered_df['MCI'].unique()))}** MCIs Found",divider=True)
 
 
 ##----- TABELLA -----
 
-#zip_states = filtered_df_yes.groupby('State_y').size().reset_index(name='Appt')
-df_recap = filtered_df.groupby('URL')['Cost per result'].mean().reset_index(name='Leads')
+def cpa_aggregation(group_df):
+    total_spent = group_df['Spent'].sum()
+    total_conversions = group_df['Results'].sum()
+    return pd.Series({
+        'Spent': total_spent,
+        'Conversions': total_conversions,
+        'CPA': total_spent / total_conversions if total_conversions > 0 else float('nan')
+    })
+
+pivot_with_cpa = filtered_df.groupby('URL').apply(cpa_aggregation).reset_index()
+df = pivot_with_cpa.style.format('{:.2f$}')
+#df_recap = filtered_df.groupby('URL')['Cost per result'].mean().reset_index(name='Leads')
 
 selected_rows = st.data_editor(
-    df_recap
-    .sort_values(by="Leads", ascending=False)
+    pivot_with_cpa
+    .sort_values(by="Spent", ascending=False)
     .reset_index(drop=True),
     use_container_width=False,
     height=400,
@@ -182,109 +196,5 @@ st.plotly_chart(fig, use_container_width=True)
 #df.plot(x="Month", y="Sales", kind="line", title="Monthly Sales", legend=True,color='red')
 
 st.divider()
-
-
-
-"""""""""
-fig = px.line(data_frame=filtered_df, color = "URL", x="date", y="URL")
-
-st.plotly_chart(fig, use_container_width=True, width=800)
-
-
-##----- TREND CPL per MCI per WEEK -----
-
-import matplotlib.pyplot as plt
-import seaborn as sns
-import matplotlib.ticker as mtick
-import plotly.express as px
-from numpy.random import default_rng as rng
-
-st.subheader("💸 Trend MCI by Week")
-
-st.line_chart(filtered_df, x="date", y="Cost per result", color="MCI")
-
-st.divider()
-
-
-##----- TREND ROI per MESE -----
-
-import matplotlib.pyplot as plt
-import seaborn as sns
-import matplotlib.ticker as mtick
-import plotly.express as px
-
-st.subheader("💸 Trend ROI by Month")
-
-fig = px.line(data_frame=df_final, x="Month-Year-Eng", y="ROI")
-
-st.plotly_chart(fig, use_container_width=True, width=800)
-
-st.divider()
-
------
-
-file_mci = "/Users/jmechach/Desktop/MCI Tracker.xlsx"
-
-mci_df = pd.concat(pd.read_excel(file_mci, sheet_name=['US', 'UK', 'ES', 'CA', 'FR', 'DE', 'PT', 'IT', 'CH', 'AU', 'HU', 'PL', 'Frasier', 'FLAGSHIP']), ignore_index=True)
-mci_df['MCI'] = mci_df['MCI'].astype(str).str.strip().str.upper()
-
-df_final = pd.merge(df, mci_df, on='MCI', how='left')
-df_final.to_excel("/Users/jmechach/Desktop/test_FTH_ver5.xlsx")
-
-
-#---- DASHBOARD ----
-
-import folium
-import streamlit as st
-import plotly.express as px
-import pydeck as pdk
-import openpyxl
-
-uploaded_file = st.file_uploader("Upload your Excel file", type=["xlsx"])
-
-if uploaded_file:
-    df_st = pd.read_excel(uploaded_file, engine="openpyxl")
-else:
-    st.warning("Please upload an Excel file to proceed.")
-
-paese = df_final['MCI'][0]
-st.title(f'📈 FTH Dashboard of {paese[:2]}')
-
-##----- TABELLA -----
-
-selected_rows = st.data_editor(
-    df_final[["MCI", "Campaign","Channel","ROI","Lead2App"]]
-    .sort_values(by="ROI", ascending=False)
-    .reset_index(drop=True),
-    use_container_width=False,
-    height=400,
-    width=1000,
-    num_rows="dynamic",
-    hide_index=True,
-    column_config={"Link": st.column_config.LinkColumn()},
-    key="table_selection"
-)
-
-st.divider()
-
-##----- TREND ROI per MESE -----
-
-import matplotlib.pyplot as plt
-import seaborn as sns
-import matplotlib.ticker as mtick
-import plotly.express as px
-
-st.subheader("💸 Trend ROI by Month")
-
-fig = px.line(data_frame=df_final, x="Month-Year-Eng", y="ROI")
-
-st.plotly_chart(fig, use_container_width=True, width=800)
-
-st.divider()
-
-
-#df = df.rename(columns={'MCI Channel': 'MCI'})
-#df["MCI"] = df["MCI"].astype(str).str.strip().str.title()
-
 
 """""""""
