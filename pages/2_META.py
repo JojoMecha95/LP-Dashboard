@@ -9,6 +9,7 @@ import streamlit as st
 file = "META_ALL COUNTRIES.csv"
 
 
+
 @st.cache_data
 
 #---- Funzioni Varie ----
@@ -80,10 +81,10 @@ else:
 ##----- SLIDER FILTRI -----
     #----- Leads -----
     
-    min_leads = int(min(df["Results"]))
-    max_leads = int(max(df["Results"]))
+    min_leads_value = int(min(df["Results"]))
+    max_leads_value = int(max(df["Results"]))
 
-    selected_attempts = st.sidebar.slider("Number of Leads", min_leads, max_leads, (1, 50))
+    min_leads, max_leads = st.sidebar.slider("Number of Leads", min_leads_value, max_leads_value, (1, 100))
     
     #----- URL -----
     url = df['URL'].unique()
@@ -262,5 +263,7 @@ st.data_editor(
     )
 
 st.divider()
+
+
 
 
