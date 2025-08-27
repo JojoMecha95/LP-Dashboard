@@ -10,7 +10,6 @@ from datetime import datetime
 #file = "/Users/jmechach/Desktop/LP_Dashboard/Taboola.csv"
 file = "Taboola.csv"
 
-
 @st.cache_data
 
 #---- Funzioni Varie ----
@@ -21,9 +20,10 @@ def get_week(value):
 
 def extract_country(value): 
     if isinstance(value, str):
-        match = re.findall(r'(\w+)_(\w+)_(\w+)_(\w+)_(\w+)', value)
-        return str(match[0][1]) if match else None
-    return 
+        lista = value.split('_')
+        country = str(lista[1])
+        return country
+    return
 
 def extract_mci(value): 
     if isinstance(value, str):
@@ -79,10 +79,10 @@ else:
 ##----- SLIDER FILTRI -----
     #----- Leads -----
     
-    min_leads = int(min(df["Conversions"]))
-    max_leads = int(max(df["Conversions"]))
+    min_leads_value = int(min(df["Conversions"]))
+    max_leads_value = int(max(df["Conversions"]))
 
-    selected_attempts = st.sidebar.slider("Number of Leads", min_leads, max_leads, (1, 100))
+    min_leads, max_leads = st.sidebar.slider("Number of Leads", min_leads_value, max_leads_value, (1, 100))
     
     #----- URL -----
     url = df['URL'].unique()
@@ -114,7 +114,7 @@ else:
     disabled=mci_all, 
     )
     #----- Date -----
-    date_range = st.sidebar.date_input('Select Date Range', value=["2023-01-01","2026-01-01"])
+    date_range = st.sidebar.date_input('Select Date Range', value=["2024-01-01","2026-01-01"])
 
     filtered_df = df[
        (df["Conversions"] >= min_leads) & (df["Conversions"] <= max_leads)
@@ -132,8 +132,8 @@ else:
     if not mci_all:
         filtered_df = filtered_df[filtered_df['MCI'].isin(mcis)]
 
-st.write(f"🌐 {len(list(filtered_df['URL'].unique()))} URLs Found")
-st.write(f"🆔 {len(list(filtered_df['MCI'].unique()))} MCIs Found",divider=True)
+st.write(f"🌐 **{len(list(filtered_df['URL'].unique()))}** URLs Found")
+st.write(f"🆔 **{len(list(filtered_df['MCI'].unique()))}** MCIs Found",divider=True)
 
 ##----- TABELLA -----
 
@@ -150,6 +150,8 @@ def cpa_aggregation(group_df):
     })
 
 pivot_with_cpa = filtered_df.groupby('URL').apply(cpa_aggregation).reset_index()
+#pivot_with_cpa['Spent'] = pivot_with_cpa['Spent'].map("{:,.0f€}".format)
+
 
 selected_rows = st.data_editor(
     pivot_with_cpa
@@ -186,7 +188,7 @@ st.plotly_chart(fig, use_container_width=True)
 
 st.divider()
 ##----- + Tavola
-grouped = df.groupby(['URL', 'Week']).agg({
+grouped = filtered_df.groupby(['URL', 'Week']).agg({
     'Spent': 'sum',
     'Conversions': 'sum'
 }).reset_index()
@@ -213,7 +215,7 @@ st.plotly_chart(fig, use_container_width=True)
 st.divider()
 
 ##----- + Tavola
-grouped = df.groupby(['MCI', 'Week']).agg({
+grouped = filtered_df.groupby(['MCI', 'Week']).agg({
     'Spent': 'sum',
     'Conversions': 'sum'
 }).reset_index()
@@ -221,7 +223,7 @@ grouped = df.groupby(['MCI', 'Week']).agg({
 grouped['CPA'] = (grouped['Spent'] / grouped['Conversions']).map("{:,.1f}".format)
 pivot_week_url = grouped.pivot(index='MCI', columns='Week', values='CPA')
 
-st.markdown('**URL performance by week**')
+st.markdown('**MCI performance by week**')
 st.write(pivot_week_url)
 
 st.divider()
