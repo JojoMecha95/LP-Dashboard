@@ -5,7 +5,11 @@ st.set_page_config(
     page_icon = "🐭"
 )
 
-st.title("Welcome!")
-st.sidebar.success("Select the Channel")
+st.title("Benvenuto!🐿️")
+st.sidebar.success("Seleziona il Canale qui sopra")
 
-st.write("Welcome! Please choose the channel from the buttons to the left")
+st.header("Istruzioni per l'uso")
+
+st.write("*Per rendere leggibile la dashboard seleziona i filtri che ti interessano a destra. Scegli Country e Periodo (WEEK). Nota: il filtro date range non funziona per ora. Puoi selezionare anche gli MCI. La selezione può essere multipla.* \n\n **Tabelle:** puoi renderle più leggibili ridimensionando le colonne a mano. \n\n **Grafici:** sono interattivi. Clicca su un valore della legenda per escluderlo. Se passi il mouse sul grafico puoi vedere più dettagli sui valori")
+st.image("Filtri.png", caption="Filtri",width=300)
+
