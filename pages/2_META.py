@@ -28,6 +28,7 @@ def extract_date(value):
         if ' - ' in value:
             match = re.split(" - ", value)
             return str(match[1]) if match else np.nan
+        return pd.to_datetime(value,errors="coerce")
     return np.nan 
 
 def extract_url(value): 
@@ -35,6 +36,10 @@ def extract_url(value):
         match = re.findall(r'(.+)\?mci=(\w+)', value)
         return str(match[0][0]) if match else np.nan
     return np.nan 
+
+def get_week(value):
+    week_number = value.isocalendar()[1]
+    return(week_number)
 
 #---- CLEANING ----
 
@@ -45,6 +50,7 @@ def load_data():
     df['Country'] = df['Ad name'].apply(get_country)
     df['MCI'] = df['Ad name'].apply(get_mci)
     df['date'] = pd.to_datetime(df['Week'].apply(extract_date),errors="coerce")
+    df['Weeks'] = df['date'].apply(get_week)
     df['URL'] = df['URL'].apply(extract_url)
 
     df = df[~df['URL'].isin(["http://fb.me/"])]
@@ -108,8 +114,20 @@ else:
     mci, 
     disabled=mci_all, 
     )
+
+    #----- WEEK -----
+    week = df['Weeks'].unique()
+    
+    week_all = st.sidebar.checkbox("ALL_WEEKs", value=True)
+ 
+    weeks = st.sidebar.multiselect(
+    'Select Week',
+    week, 
+    disabled=week_all, 
+    )
+
     #----- Date -----
-    date_range = st.sidebar.date_input('Select Date Range', value=["2023-01-01","2026-01-01"])
+    date_range = st.sidebar.date_input('Select Date Range', value=["2024-01-01","2026-01-01"])
 
     filtered_df = df[
        (df["Results"] >= min_leads) & (df["Results"] <= max_leads)
@@ -120,12 +138,15 @@ else:
     
     if not all_country:
         filtered_df = filtered_df[filtered_df['Country'].isin(country)]
-    
-    if not date_range:
-         filtered_df = filtered_df[(filtered_df['date'] == date_range)]
-    
+       
     if not mci_all:
         filtered_df = filtered_df[filtered_df['MCI'].isin(mcis)]
+
+    if not week_all:
+        filtered_df = filtered_df[filtered_df['Weeks'].isin(weeks)]
+    
+    if not date_range:
+        filtered_df = filtered_df[(filtered_df['date'].isin(date_range))]
 
 st.write(f"🌐 **{len(list(filtered_df['URL'].unique()))}** URLs Found")
 st.write(f"🆔 **{len(list(filtered_df['MCI'].unique()))}** MCIs Found",divider=True)
@@ -182,6 +203,28 @@ st.plotly_chart(fig, use_container_width=True)
 
 st.divider()
 
+##----- + Tavola
+grouped = filtered_df.groupby(['URL', 'Week']).agg({
+    'Spent': 'sum',
+    'Results': 'sum'
+}).reset_index()
+
+grouped['CPA'] = (grouped['Spent'] / grouped['Results']).map("{:,.1f}".format)
+pivot_week_url = grouped.pivot(index='URL', columns='Week', values='CPA')
+
+st.markdown('**URL performance by week**')
+st.data_editor(
+    pivot_week_url,
+    use_container_width=True,
+    #height=400,
+    width=1500,
+    #num_rows="dynamic",
+    #hide_index=True,
+    column_config={"Link": st.column_config.LinkColumn()}
+    #key="table_selection"
+    )
+
+st.divider()
 
 ##----- TREND CPL per MCI per WEEK -----
 
@@ -196,4 +239,28 @@ st.plotly_chart(fig, use_container_width=True)
 #df.plot(x="Month", y="Sales", kind="line", title="Monthly Sales", legend=True,color='red')
 
 st.divider()
+
+##----- + Tavola
+grouped = filtered_df.groupby(['MCI', 'Week']).agg({
+    'Spent': 'sum',
+    'Results': 'sum'
+}).reset_index()
+
+grouped['CPA'] = (grouped['Spent'] / grouped['Results']).map("{:,.1f}".format)
+pivot_week_url = grouped.pivot(index='MCI', columns='Week', values='CPA')
+
+st.markdown('**MCI performance by week**')
+st.data_editor(
+    pivot_week_url,
+    use_container_width=True,
+    #height=400,
+    width=1500,
+    #num_rows="dynamic",
+    #hide_index=True,
+    column_config={"Link": st.column_config.LinkColumn()}
+    #key="table_selection"
+    )
+
+st.divider()
+
 
