@@ -11,6 +11,7 @@ from datetime import datetime
 file = "Taboola.csv"
 
 
+
 @st.cache_data
 
 #---- Funzioni Varie ----
@@ -78,13 +79,7 @@ else:
 
 
 ##----- SLIDER FILTRI -----
-    #----- Leads -----
-    
-    min_leads_value = int(min(df["Conversions"]))
-    max_leads_value = int(max(df["Conversions"]))
 
-    min_leads, max_leads = st.sidebar.slider("Number of Leads", min_leads_value, max_leads_value, (1, 100))
-    
     #----- URL -----
     url = df['URL'].unique()
     
@@ -127,10 +122,8 @@ else:
     #----- Date -----
     date_range = st.sidebar.date_input('Select Date Range', value=["2024-01-01","2026-01-01"])
 
-    filtered_df = df[
-       (df["Conversions"] >= min_leads) & (df["Conversions"] <= max_leads)
-    ]
-
+    filtered_df = df
+    
     if not url_all:
         filtered_df = filtered_df[filtered_df['URL'].isin(campaign)]
     
@@ -164,8 +157,6 @@ def cpa_aggregation(group_df):
     })
 
 pivot_with_cpa = filtered_df.groupby('URL').apply(cpa_aggregation).reset_index()
-#pivot_with_cpa['Spent'] = pivot_with_cpa['Spent'].map("{:,.0f€}".format)
-
 
 selected_rows = st.data_editor(
     pivot_with_cpa
@@ -239,8 +230,6 @@ pivot_week_url = grouped.pivot(index='MCI', columns='Week', values='CPA')
 
 st.markdown('**MCI performance by week**')
 st.write(pivot_week_url)
-
-st.divider()
 
 st.divider()
 
