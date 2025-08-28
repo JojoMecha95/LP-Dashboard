@@ -10,6 +10,7 @@ from datetime import datetime
 #file = "/Users/jmechach/Desktop/LP_Dashboard/Taboola.csv"
 file = "Taboola.csv"
 
+
 @st.cache_data
 
 #---- Funzioni Varie ----
@@ -113,6 +114,16 @@ else:
     mci, 
     disabled=mci_all, 
     )
+    #----- WEEK -----
+    week = df['Week'].unique()
+    
+    week_all = st.sidebar.checkbox("ALL_WEEKs", value=True)
+ 
+    weeks = st.sidebar.multiselect(
+    'Select Week',
+    week, 
+    disabled=week_all, 
+    )
     #----- Date -----
     date_range = st.sidebar.date_input('Select Date Range', value=["2024-01-01","2026-01-01"])
 
@@ -127,8 +138,11 @@ else:
         filtered_df = filtered_df[filtered_df['Country'].isin(country)]
     
     if not date_range:
-         filtered_df = filtered_df[(filtered_df['date'] == date_range)]
-    
+         filtered_df = filtered_df[(filtered_df['date'] == date_range)]  
+
+    if not week_all:
+        filtered_df = filtered_df[filtered_df['Week'].isin(weeks)]
+
     if not mci_all:
         filtered_df = filtered_df[filtered_df['MCI'].isin(mcis)]
 
@@ -227,5 +241,6 @@ st.markdown('**MCI performance by week**')
 st.write(pivot_week_url)
 
 st.divider()
+
 
 
