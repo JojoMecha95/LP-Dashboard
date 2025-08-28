@@ -193,7 +193,7 @@ from numpy.random import default_rng as rng
 
 st.subheader("💸 Trend CPL by Week")
 
-pivot1 = filtered_df.pivot_table(columns='URL', index='Date', values='CPA', aggfunc="mean").reset_index()
+pivot1 = filtered_df.pivot_table(columns='URL', index='Date', values='CPA', aggfunc="mean").reset_index().fillna(0)
 
 fig = px.line(pivot1, x='Date', y=pivot1.columns[1:], title="Cost per result by URL")
 fig.update_layout(legend=dict(yanchor="top", y=-0.5, xanchor="left", x=0.2),showlegend=True)
@@ -219,7 +219,7 @@ st.divider()
 
 st.subheader("💸 Trend MCI by Week")
 
-pivot2 = filtered_df.pivot_table(columns='MCI', index='Date', values='CPA',aggfunc="mean").reset_index()
+pivot2 = filtered_df.pivot_table(columns='MCI', index='Date', values='CPA',aggfunc="mean").reset_index().fillna(0)
 
 fig = px.line(pivot2, x='Date', y=pivot2.columns[1:], title="Cost per result by MCI")
 
@@ -239,6 +239,8 @@ pivot_week_url = grouped.pivot(index='MCI', columns='Week', values='CPA')
 
 st.markdown('**MCI performance by week**')
 st.write(pivot_week_url)
+
+st.divider()
 
 st.divider()
 
