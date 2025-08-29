@@ -8,7 +8,7 @@ from datetime import datetime
 
 #file = "/Users/jmechach/Desktop/LP_Dashboard/Meta.csv"
 #file = "/Users/jmechach/Desktop/LP_Dashboard/Taboola.csv"
-file = "Taboola.csv"
+file = "Taboola_ALL COUNTRIES_V2.csv"
 
 
 
